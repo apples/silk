@@ -1,0 +1,7 @@
+{
+  "name": "com.moonflowergames.silk",
+  "version": "0.1.0",
+  "displayName": "Silk",
+  "description": "Lightweight fiber framework",
+  "unity": "2021.3"
+}
