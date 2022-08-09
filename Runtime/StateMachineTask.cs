@@ -13,9 +13,8 @@ namespace Silk
     /// Automatically handles keeping track of the next state.
     /// Supports serialization.
     /// </summary>
-    /// <typeparam name="T"></typeparam>
     [Serializable]
-    public abstract class StateMachineTask<T> : IFiberTask, ISerializationCallbackReceiver where T : StateMachineTask<T>
+    public abstract class StateMachineTask : IFiberTask, ISerializationCallbackReceiver
     {
         /// <summary>
         /// This is used during deserialization to create a delegate to the generic version of <see cref="CreateAwaitingRunStateExecutor{V}"/>.
@@ -25,7 +24,7 @@ namespace Silk
         static StateMachineTask()
         {
             // Unfortunately there's no super clean way of getting the MethodInfo of a generic method without doing this.
-            genericCreateRunStateFuncMethodInfo = typeof(StateMachineTask<T>)
+            genericCreateRunStateFuncMethodInfo = typeof(StateMachineTask)
                 .GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
                 .First(x => x.Name == nameof(CreateAwaitingRunStateExecutor) && x.IsGenericMethodDefinition);
         }
@@ -235,7 +234,7 @@ namespace Silk
         /// <returns></returns>
         protected TaskStatus BecomeTask(IFiberTask task)
         {
-            return WaitForTask(task, ((T)this).Forward);
+            return WaitForTask(task, this.Forward);
         }
 
         /// <summary>
@@ -352,7 +351,7 @@ namespace Silk
 
             // when we need the future value, we have to instantiate the generic method
 
-            var delegateType = typeof(RunStateFunc<>).MakeGenericType(typeof(T), parameterType);
+            var delegateType = typeof(RunStateFunc<>).MakeGenericType(parameterType);
 
             var nextRunStateDelegate = Delegate.CreateDelegate(delegateType, this, nextRunStateMethodInfo);
 

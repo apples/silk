@@ -232,7 +232,7 @@ It is expected that almost all of the tasks implemented for a game will be deriv
 It's probably best to start with an example:
 
 ```cs
-public class RollPrinterTask : StateMachineTask<RollPrinterTask>
+public class RollPrinterTask : StateMachineTask
 {
     protected override TaskStatus Run()
     {
