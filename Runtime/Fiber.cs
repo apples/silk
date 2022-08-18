@@ -24,6 +24,16 @@ namespace Silk
         public event Action<IFiberTask> onTaskQueued;
 
         /// <summary>
+        /// This is set when ExecuteOne is executing a task.
+        /// </summary>
+        private bool isExecuting = false;
+
+        /// <summary>
+        /// This is set when StopAllTasks is called while a task is being executed. 
+        /// </summary>
+        private bool pendingStopAll = false;
+
+        /// <summary>
         /// Queues a task to be executed. Will call onTaskQueued.
         /// </summary>
         /// <param name="task"></param>
@@ -42,6 +52,13 @@ namespace Silk
         /// </summary>
         public bool ExecuteOne()
         {
+            Debug.Assert(!pendingStopAll);
+
+            if (isExecuting)
+            {
+                throw new InvalidOperationException("Cannot execute a task while another task is being executed.");
+            }
+
             var pendingTaskIndex = pendingTasks.FindIndex(x => x.awaiting == null || x.awaiting.Fulfilled);
 
             if (pendingTaskIndex < 0)
@@ -53,6 +70,8 @@ namespace Silk
 
             try
             {
+                isExecuting = true;
+
                 var result = pendingTask.task.Continue();
 
                 switch (result.Kind)
@@ -75,8 +94,25 @@ namespace Silk
             {
                 Debug.LogError($"Exception occurred while continuing task: {e}");
                 pendingTask.taskResultFuture.Value = TaskResult.Failure;
-                pendingTasks.RemoveAt(pendingTaskIndex);
+
+                if (pendingTaskIndex >= 0 && pendingTaskIndex < pendingTasks.Count && pendingTasks[pendingTaskIndex] == pendingTask)
+                {
+                    pendingTasks.RemoveAt(pendingTaskIndex);
+                }
             }
+            finally
+            {
+                isExecuting = false;
+            }
+
+            if (pendingStopAll)
+            {
+                pendingStopAll = false;
+                StopAllTasks();
+            }
+
+            Debug.Assert(!isExecuting);
+            Debug.Assert(!pendingStopAll);
 
             return true;
         }
@@ -86,6 +122,12 @@ namespace Silk
         /// </summary>
         public void StopAllTasks()
         {
+            if (isExecuting)
+            {
+                pendingStopAll = true;
+                return;
+            }
+
             foreach (var task in pendingTasks)
             {
                 task.taskResultFuture.Value = TaskResult.Stopped;

@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.3.1
+
+- Fixed issue that occurs when `StopAllTasks()` is called from within a running task.
+
 ## 0.3.0
 
 - Removed undocumented `Fiber.ExecuteMany()` method.

@@ -261,6 +261,7 @@ In this example, the FutureRandomRoll which is awaited, is unwrapped into the pa
 
 Currently, the only way to cancel a task is with `Fiber.StopAllTasks()`.
 This method removes all tasks from the fiber's pending task list, and fulfills their result future with `TaskResult.Stopped`.
+If there is a task currently being executed, it will only be stopped if it returns a `Waiting` status.
 
 ## Serialization
 
