@@ -17,6 +17,11 @@ namespace Silk
         /// The task completed, but did not successfully accomplish its job.
         /// </summary>
         Failure,
+
+        /// <summary>
+        /// The task was stopped and did not finish.
+        /// </summary>
+        Stopped,
     }
 
     [Serializable]

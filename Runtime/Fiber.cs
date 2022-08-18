@@ -82,11 +82,16 @@ namespace Silk
         }
 
         /// <summary>
-        /// Executes task steps until there is no more work that can be done. 
+        /// Stops and removes all pending tasks.
         /// </summary>
-        public void ExecuteMany()
+        public void StopAllTasks()
         {
-            while (ExecuteOne());
+            foreach (var task in pendingTasks)
+            {
+                task.taskResultFuture.Value = TaskResult.Stopped;
+            }
+
+            pendingTasks.Clear();
         }
 
         /// <summary>

@@ -257,6 +257,11 @@ The `Wait*` methods in particular are capable of keeping track of an awaited fut
 
 In this example, the FutureRandomRoll which is awaited, is unwrapped into the parameter of PrintResult.
 
+## Stopping Tasks
+
+Currently, the only way to cancel a task is with `Fiber.StopAllTasks()`.
+This method removes all tasks from the fiber's pending task list, and fulfills their result future with `TaskResult.Stopped`.
+
 ## Serialization
 
 All aspects of this framework are serializable.
